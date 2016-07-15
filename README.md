@@ -87,3 +87,12 @@ You can change your Caffe's include and lib path in CMakeLists.txt.
 	set(CAFFE_INCLUDEDIR caffe/include caffe/distribute/include)
 	set(CAFFE_LINK_LIBRARAY caffe/lib)
 
+## Webカメラでテスト
+
+```bash
+roscore
+rosrun usb_cam usb_cam_node
+rosrun image_view image_view image:=/usb_cam/image_raw
+rosrun ros_caffe ros_caffe_test
+rostopic echo /caffe_ret
+```
