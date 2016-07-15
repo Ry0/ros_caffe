@@ -12,7 +12,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include "Classifier.h"
 
-const std::string RECEIVE_IMG_TOPIC_NAME = "camera/rgb/image_raw";
+const std::string RECEIVE_IMG_TOPIC_NAME = "usb_cam/image_raw";
 const std::string PUBLISH_RET_TOPIC_NAME = "/caffe_ret";
 
 Classifier* classifier;
@@ -57,7 +57,8 @@ int main(int argc, char **argv) {
     image_transport::ImageTransport it(nh);
     // To receive an image from the topic, PUBLISH_RET_TOPIC_NAME
     image_transport::Subscriber sub = it.subscribe(RECEIVE_IMG_TOPIC_NAME, 1, imageCallback);
-	gPublisher = nh.advertise<std_msgs::String>(PUBLISH_RET_TOPIC_NAME, 100);
+    gPublisher = nh.advertise<std_msgs::String>(PUBLISH_RET_TOPIC_NAME, 100);
+    ros::Rate loop_rate(0.5);
     const std::string ROOT_SAMPLE = ros::package::getPath("ros_caffe");
     model_path = ROOT_SAMPLE + "/data/deploy.prototxt";
     weights_path = ROOT_SAMPLE + "/data/bvlc_reference_caffenet.caffemodel";
@@ -68,17 +69,20 @@ int main(int argc, char **argv) {
     classifier = new Classifier(model_path, weights_path, mean_file, label_file);
 
     // Test data/cat.jpg
-    cv::Mat img = cv::imread(image_path, -1);
-    std::vector<Prediction> predictions = classifier->Classify(img);
-    /* Print the top N predictions. */
-    std::cout << "Test default image under /data/cat.jpg" << std::endl;
-    for (size_t i = 0; i < predictions.size(); ++i) {
-        Prediction p = predictions[i];
-        std::cout << std::fixed << std::setprecision(4) << p.second << " - \"" << p.first << "\"" << std::endl;
-    }
-	publishRet(predictions);
+    // cv::Mat img = cv::imread(image_path, -1);
+    // std::vector<Prediction> predictions = classifier->Classify(img);
+    // /* Print the top N predictions. */
+    // std::cout << "Test default image under /data/cat.jpg" << std::endl;
+    // for (size_t i = 0; i < predictions.size(); ++i) {
+    //     Prediction p = predictions[i];
+    //     std::cout << std::fixed << std::setprecision(4) << p.second << " - \"" << p.first << "\"" << std::endl;
+    // }
+    // publishRet(predictions);
 
-    ros::spin();
+    while(nh.ok()){
+        ros::spinOnce();
+        loop_rate.sleep();
+    }
     delete classifier;
     ros::shutdown();
     return 0;
